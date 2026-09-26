@@ -1,7 +1,9 @@
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive, ActivatedRoute, Router, NavigationEnd } from '@angular/router';
 import { NgIcon } from '@ng-icons/core';
+import { BrnDialogContent } from '@spartan-ng/brain/dialog';
 import { filter } from 'rxjs';
 import { TenantHttpService } from '../../../../tenant/infrastructure/tenant.http.service';
 import { AuthStore } from '../../../../auth/application/auth.store';
@@ -9,13 +11,33 @@ import { TenantContextStore } from '../../../store/tenant-context.store';
 import { EntitlementsStore } from '../../../../entitlements/application/entitlements.store';
 import { PermissionsStore } from '../../../../rbac/application/permissions.store';
 import { HlmAvatarImports } from '@spartan-ng/helm/avatar';
+import { HlmBadgeImports } from '@spartan-ng/helm/badge';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
+import { HlmDialogImports } from '@spartan-ng/helm/dialog';
 import { HlmDropdownMenuImports } from '@spartan-ng/helm/dropdown-menu';
 import { HlmSeparatorImports } from '@spartan-ng/helm/separator';
 import { HlmSidebarImports, HlmSidebarService } from '@spartan-ng/helm/sidebar';
+import { HlmSpinnerImports } from '@spartan-ng/helm/spinner';
 import { HlmTooltipImports } from '@spartan-ng/helm/tooltip';
+import { PRODUCT_BUILD, APP_ENV, PRODUCT_RELEASED_AT, PRODUCT_REVISION, PRODUCT_VERSION } from '@atta/product';
 import { SystemNoticesHostComponent } from '@canopy/system-notices/angular';
+import { environment } from '../../../../../environments/environment';
 import { InstallPromptHostComponent, PwaInstallCoordinator } from '../../../pwa-install';
+
+type AboutApiInfo = {
+  status: string;
+  version: string;
+  build: number;
+  revision: string;
+  released_at: string;
+  environment: string;
+  support_email?: string;
+  terms_url?: string;
+  privacy_url?: string;
+  license_label?: string;
+};
+
+type AppEnv = 'local' | 'staging' | 'production';
 
 @Component({
   selector: 'app-tenant-layout',
@@ -26,11 +48,15 @@ import { InstallPromptHostComponent, PwaInstallCoordinator } from '../../../pwa-
     RouterLink,
     RouterLinkActive,
     NgIcon,
+    BrnDialogContent,
     HlmSidebarImports,
     HlmDropdownMenuImports,
     HlmAvatarImports,
+    HlmBadgeImports,
     HlmButtonImports,
+    HlmDialogImports,
     HlmSeparatorImports,
+    HlmSpinnerImports,
     HlmTooltipImports,
     SystemNoticesHostComponent,
     InstallPromptHostComponent,
@@ -163,6 +189,14 @@ import { InstallPromptHostComponent, PwaInstallCoordinator } from '../../../pwa-
               </li>
             </ul>
           </hlm-sidebar-group>
+
+          <button
+            type="button"
+            class="mt-auto w-full px-4 py-2 text-right font-mono text-xs text-muted-foreground hover:text-foreground group-data-[collapsible=icon]:px-0.5 group-data-[collapsible=icon]:text-center group-data-[collapsible=icon]:text-[10px] group-data-[collapsible=icon]:leading-tight"
+            (click)="openAbout()"
+          >
+            <span class="group-data-[collapsible=icon]:hidden">Versión </span>{{ productVersion }}
+          </button>
         </hlm-sidebar-content>
 
         <hlm-sidebar-footer class="border-t border-sidebar-border">
@@ -224,11 +258,105 @@ import { InstallPromptHostComponent, PwaInstallCoordinator } from '../../../pwa-
     </div>
     <bb-system-notices-host scope="tenant" />
     <app-install-prompt-host />
+
+    <hlm-dialog [state]="aboutOpen() ? 'open' : 'closed'" (closed)="aboutOpen.set(false)">
+      <hlm-dialog-content *brnDialogContent class="sm:max-w-lg">
+        <hlm-dialog-header>
+          <h2 hlmDialogTitle>Acerca del software</h2>
+          <p hlmDialogDescription>Identidad de esta instalación. Úsala al reportar problemas.</p>
+        </hlm-dialog-header>
+
+        @if (aboutLoading()) {
+          <div class="flex items-center justify-center py-8">
+            <hlm-spinner class="size-6 text-primary" />
+          </div>
+        } @else {
+          <div class="space-y-5 py-1 text-sm">
+            <section class="space-y-2">
+              <h3 class="text-xs font-semibold tracking-wide text-muted-foreground uppercase">Cliente (PWA)</h3>
+              <div class="mb-3 flex items-center justify-between gap-2">
+                <span class="text-muted-foreground">Entorno</span>
+                <span hlmBadge class="font-mono" [variant]="environmentBadgeVariant(appEnv)">{{ environmentLabel(appEnv) }}</span>
+              </div>
+              <dl class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5">
+                <dt class="text-muted-foreground">Versión</dt>
+                <dd class="text-right font-mono">{{ productVersion }}</dd>
+                <dt class="text-muted-foreground">Build</dt>
+                <dd class="text-right font-mono">{{ productBuild }}</dd>
+                <dt class="text-muted-foreground">Revisión</dt>
+                <dd class="text-right font-mono">{{ productRevision }}</dd>
+                <dt class="text-muted-foreground">Fecha de release</dt>
+                <dd class="text-right font-mono text-xs leading-snug">{{ formatReleasedAt(productReleasedAt) }}</dd>
+              </dl>
+            </section>
+
+            <hlm-separator />
+
+            <section class="space-y-2">
+              <h3 class="text-xs font-semibold tracking-wide text-muted-foreground uppercase">Instalación (API)</h3>
+              @if (aboutError(); as err) {
+                <p class="text-sm text-destructive">{{ err }}</p>
+              } @else if (aboutApi(); as api) {
+                <div class="mb-3 flex items-center justify-between gap-2">
+                  <span class="text-muted-foreground">Entorno</span>
+                  <span hlmBadge class="font-mono" [variant]="environmentBadgeVariant(api.environment)">{{ environmentLabel(api.environment) }}</span>
+                </div>
+                <dl class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5">
+                  <dt class="text-muted-foreground">Versión</dt>
+                  <dd class="text-right font-mono">{{ api.version }}</dd>
+                  <dt class="text-muted-foreground">Build</dt>
+                  <dd class="text-right font-mono">{{ api.build }}</dd>
+                  <dt class="text-muted-foreground">Revisión</dt>
+                  <dd class="text-right font-mono">{{ api.revision }}</dd>
+                  <dt class="text-muted-foreground">Fecha de release</dt>
+                  <dd class="text-right font-mono text-xs leading-snug">{{ formatReleasedAt(api.released_at) }}</dd>
+                </dl>
+              }
+            </section>
+
+            <hlm-separator />
+
+            <section class="space-y-2">
+              <h3 class="text-xs font-semibold tracking-wide text-muted-foreground uppercase">Soporte y legal</h3>
+              <dl class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5">
+                <dt class="text-muted-foreground">Soporte</dt>
+                <dd class="text-right">
+                  @if (supportEmail(); as email) {
+                    <a class="font-mono text-primary underline-offset-2 hover:underline" [href]="'mailto:' + email">{{ email }}</a>
+                  } @else {
+                    <span class="text-muted-foreground">—</span>
+                  }
+                </dd>
+                <dt class="text-muted-foreground">Licencia</dt>
+                <dd class="text-right">{{ aboutApi()?.license_label || 'Software propietario' }}</dd>
+                @if (aboutApi()?.terms_url; as termsUrl) {
+                  <dt class="text-muted-foreground">Términos</dt>
+                  <dd class="text-right">
+                    <a class="text-primary underline-offset-2 hover:underline" [href]="termsUrl" target="_blank" rel="noopener noreferrer">Ver términos</a>
+                  </dd>
+                }
+                @if (aboutApi()?.privacy_url; as privacyUrl) {
+                  <dt class="text-muted-foreground">Privacidad</dt>
+                  <dd class="text-right">
+                    <a class="text-primary underline-offset-2 hover:underline" [href]="privacyUrl" target="_blank" rel="noopener noreferrer">Ver política</a>
+                  </dd>
+                }
+              </dl>
+            </section>
+          </div>
+        }
+
+        <hlm-dialog-footer>
+          <button type="button" hlmBtn variant="outline" (click)="aboutOpen.set(false)">Cerrar</button>
+        </hlm-dialog-footer>
+      </hlm-dialog-content>
+    </hlm-dialog>
   `,
 })
 export class TenantLayoutComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private http = inject(HttpClient);
   private tenantService = inject(TenantHttpService);
   private authStore = inject(AuthStore);
   private tenantContextStore = inject(TenantContextStore);
@@ -236,6 +364,26 @@ export class TenantLayoutComponent implements OnInit {
   readonly permissions = inject(PermissionsStore);
   readonly sidebarService = inject(HlmSidebarService);
   readonly installCoordinator = inject(PwaInstallCoordinator);
+  readonly productVersion = PRODUCT_VERSION;
+  readonly productBuild = PRODUCT_BUILD;
+  readonly productRevision = PRODUCT_REVISION;
+  readonly productReleasedAt = PRODUCT_RELEASED_AT;
+  readonly appEnv = APP_ENV;
+  readonly aboutOpen = signal(false);
+  readonly aboutLoading = signal(false);
+  readonly aboutError = signal<string | null>(null);
+  readonly aboutApi = signal<AboutApiInfo | null>(null);
+
+  readonly supportEmail = computed(() => {
+    const fromApi = this.aboutApi()?.support_email?.trim();
+    if (fromApi) {
+      return fromApi;
+    }
+    if (this.appEnv === 'local') {
+      return 'soporte@atta.com';
+    }
+    return null;
+  });
 
   themeMode = signal<'system' | 'light' | 'dark'>('system');
 
@@ -322,6 +470,58 @@ export class TenantLayoutComponent implements OnInit {
   }
 
   closeTenantMenu() {}
+
+  openAbout(): void {
+    this.aboutOpen.set(true);
+    this.aboutLoading.set(true);
+    this.aboutError.set(null);
+    this.http.get<AboutApiInfo>(`${environment.apiUrl}/api/health`).subscribe({
+      next: (payload) => {
+        this.aboutApi.set(payload);
+        this.aboutLoading.set(false);
+      },
+      error: () => {
+        this.aboutApi.set(null);
+        this.aboutError.set('No se pudo obtener la información del API.');
+        this.aboutLoading.set(false);
+      },
+    });
+  }
+
+  environmentLabel(value: string): string {
+    switch (value as AppEnv) {
+      case 'staging':
+        return 'Staging';
+      case 'production':
+        return 'Production';
+      case 'local':
+      default:
+        return 'Local';
+    }
+  }
+
+  environmentBadgeVariant(value: string): 'default' | 'secondary' | 'outline' {
+    switch (value as AppEnv) {
+      case 'production':
+        return 'default';
+      case 'staging':
+        return 'secondary';
+      case 'local':
+      default:
+        return 'outline';
+    }
+  }
+
+  formatReleasedAt(value: string): string {
+    const parsed = Date.parse(value);
+    if (Number.isNaN(parsed)) {
+      return value;
+    }
+    return new Intl.DateTimeFormat('es-CO', {
+      dateStyle: 'medium',
+      timeStyle: 'medium',
+    }).format(new Date(parsed));
+  }
 
   openInstall(): void {
     void this.installCoordinator.openFromMenu();
