@@ -13,7 +13,7 @@
 
 - Run `mise install` first. Versions are pinned: Node `24`, Go `1.25`, pnpm `11.5` (`.mise.toml`, `.nvmrc`, root `package.json`, `apps/atta/backend/go.mod`).
 - This repo is **Canopy** (habitat). Products live under `apps/<product>/`. The current product is **Atta** (`apps/atta`). Shared TypeScript is `@canopy/*` in `packages/typescript/`. See [Naming](docs/product/naming.md).
-- Use `pnpm` only. Workspace roots are `apps/*/*`, `apps/*/deploy/*`, `apps/*/deploy/aws/sdks/neon`, and `packages/typescript/*` (`pnpm-workspace.yaml`), orchestrated by Turbo (`turbo.json`).
+- Use `pnpm` only. Workspace roots are `apps/*`, `apps/*/*`, `apps/*/deploy/*`, `apps/*/deploy/aws/sdks/neon`, and `packages/typescript/*` (`pnpm-workspace.yaml`), orchestrated by Turbo (`turbo.json`).
 - Env files live per product under `apps/<product>/`. `ENV_FILE` is relative to the repo root (default `apps/atta/.env`). Loaders (`scripts/with-env.sh`, Playwright, Pulumi) honor it and override existing keys. Daily Atta work uses `apps/atta/.env`; the full test loop uses `apps/atta/.env.test` (from `.env.test.example`). Turbo uses `envMode: loose` + `globalDependencies: ["apps/*/.env", "apps/*/.env.test"]`. Keep `apps/atta/deploy/onprem/.env` on each client VM (Compose secrets). Do not commit `apps/atta/deploy/onprem/hosts.json`.
 
 ## Commands that matter
@@ -79,7 +79,7 @@ Product daily tasks live in `apps/<product>/mise.toml`. From anywhere:
 - Specs are split into two Playwright projects: `tests/browser/` (real browser) and `tests/http/` (API contracts). Shared clients/factories live in `tests/support/`.
 - Default origins are local (`https://app.atta.dev` for PWA and API, `https://media.atta.dev` for MinIO). Override with `E2E_BASE_URL`, `E2E_API_BASE_URL`, and `E2E_MEDIA_BASE_URL` (see `apps/atta/.env.example`).
 - Ad-hoc e2e (stack already running via `mise //apps/atta:dev`): `mise //apps/atta:test:e2e:local` (chromium + http), `mise //apps/atta:test:e2e` (all projects incl. WebKit), `mise //apps/atta:test:e2e:browser`, `mise //apps/atta:test:e2e:http`, `mise //apps/atta:test:e2e:ui` (interactive).
-- To test the full auth flow, the backend must be in `local` or `development` mode so the `/api/v1/auth/register-local` endpoint is enabled.
+- To test the full auth flow, the backend must be in `local` mode so the `/api/v1/auth/register-local` endpoint is enabled.
 - UI doesn't have a signup form yet, so fixtures rely on the API `registerLocalOrFail` directly for setup.
 
 ## Local infra and deploy constraints

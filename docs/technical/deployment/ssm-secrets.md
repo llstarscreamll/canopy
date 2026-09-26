@@ -64,19 +64,23 @@ EventBridge directly.
 
 ## Optional fields (merged when present)
 
-| Key                       | Type    | Description                                  |
-| ------------------------- | ------- | -------------------------------------------- |
-| `google_client_id`        | string  | Gmail OAuth client ID                        |
-| `google_client_secret`    | string  | Gmail OAuth client secret                    |
-| `microsoft_client_id`     | string  | Microsoft mail OAuth client ID               |
-| `microsoft_client_secret` | string  | Microsoft mail OAuth client secret           |
-| `gemini_model`            | string  | Gemini model id (default `gemini-2.0-flash`) |
-| `gemini_endpoint`         | string  | Gemini API base URL                          |
-| `app_env`                 | string  | Runtime environment label (`ENV`)            |
-| `allowed_origins`         | string  | Comma-separated CORS origins                 |
-| `frontend_url`            | string  | PWA base URL                                 |
-| `backend_url`             | string  | Public API origin (same host as the PWA)     |
-| `debug`                   | boolean | Enable debug mode (not written by Pulumi)    |
+| Key                       | Type    | Description                                    |
+| ------------------------- | ------- | ---------------------------------------------- |
+| `google_client_id`        | string  | Gmail OAuth client ID                          |
+| `google_client_secret`    | string  | Gmail OAuth client secret                      |
+| `microsoft_client_id`     | string  | Microsoft mail OAuth client ID                 |
+| `microsoft_client_secret` | string  | Microsoft mail OAuth client secret             |
+| `gemini_model`            | string  | Gemini model id (default `gemini-2.0-flash`)   |
+| `gemini_endpoint`         | string  | Gemini API base URL                            |
+| `app_env`                 | string  | Channel: `local` \| `staging` \| `production`  |
+| `allowed_origins`         | string  | Comma-separated CORS origins                   |
+| `frontend_url`            | string  | PWA base URL                                   |
+| `backend_url`             | string  | Public API origin (same host as the PWA)       |
+| `support_email`           | string  | Support contact for about / `GET /api/health`  |
+| `terms_url`               | string  | Optional terms-of-service URL                  |
+| `privacy_url`             | string  | Optional privacy-policy URL                    |
+| `license_label`           | string  | License label (default `Software propietario`) |
+| `debug`                   | boolean | Enable debug mode (not written by Pulumi)      |
 
 ## Not in the parameter (Lambda env only)
 
@@ -105,7 +109,7 @@ Pulumi always writes `app_env`, `allowed_origins`, `frontend_url`, and
 
 ```json
 {
-  "app_env": "prod",
+  "app_env": "production",
   "database_url": "postgres://atta:secret@ep-xxx-pooler.us-east-1.aws.neon.tech/atta?sslmode=require",
   "database_direct_url": "postgres://atta:secret@ep-xxx.us-east-1.aws.neon.tech/atta?sslmode=require",
   "sqs_queue_url": "https://sqs.us-east-1.amazonaws.com/ACCOUNT_ID/prod-atta-jobs",

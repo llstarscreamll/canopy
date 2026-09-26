@@ -21,6 +21,11 @@ the Neon default branch. Do not name the stack `develop` or `test`.
 | `.github/workflows/ci.yml`         | Every pull request; every push to `develop` and `master`      | `pnpm run lint`, `test`, and `build` using `apps/atta/.env.test` |
 | `.github/workflows/deploy-aws.yml` | Push to `develop` (docs-only paths skipped); **Run workflow** | `pnpm run build` then `@atta/infra` deploy with `ENV=staging`    |
 
+Before packaging, set `ATTA_BUILD` (monotonic int) and optionally
+`ATTA_REVISION` so store-safe build identity is embedded. See
+[Product versioning](../architecture/product-versioning.md). Default
+fallback is `git rev-list --count HEAD` (needs a full clone).
+
 The deploy job authenticates to AWS with GitHub OIDC (`id-token: write`).
 Do not store `AWS_ACCESS_KEY_ID` or `AWS_SECRET_ACCESS_KEY` in GitHub.
 
@@ -90,6 +95,9 @@ add:
 | `GEMINI_MODEL`         | no       | `gemini-2.0-flash`                          |
 | `GEMINI_ENDPOINT`      | no       | `https://generativelanguage.googleapis.com` |
 | `ALARM_EMAIL`          | no       | `ops@example.com`                           |
+| `SUPPORT_EMAIL`        | yes      | `soporte@example.com` (about / health)      |
+| `TERMS_URL`            | no       | Terms URL for about / health                |
+| `PRIVACY_URL`          | no       | Privacy URL for about / health              |
 
 The workflow hardcodes `ENV=staging` and `AWS_REGION=us-east-1`. Do not
 add those as variables.

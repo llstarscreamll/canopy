@@ -8,6 +8,7 @@ How it works and how to run it.
 
 - [Getting started](./technical/getting-started.md)
 - [Monorepo layout](./technical/architecture/monorepo.md)
+- [Product versioning](./technical/architecture/product-versioning.md)
 - [Backend API](./technical/architecture/backend-api.md)
 - [Runtime profiles (onprem vs AWS)](./technical/architecture/runtime-profiles.md)
 - [Outbox relay](./technical/architecture/outbox-relay.md)

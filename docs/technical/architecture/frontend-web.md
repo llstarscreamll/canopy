@@ -34,7 +34,11 @@ Keep feature orchestration in `*/application/*store.ts`; keep presentation thin.
 
 ### Tenant shell
 
-`TenantLayoutComponent` wraps `/:tenantId/*` with a collapsible sidebar. `tenant.interceptor.ts` sets `X-Tenant-ID` from the path.
+`TenantLayoutComponent` wraps `/:tenantId/*` with a collapsible sidebar.
+The brand block shows the app name. Clicking `Versión {PRODUCT_VERSION}`
+at the bottom of the navigation column opens an about dialog (version,
+build, revision, release date). `tenant.interceptor.ts` sets
+`X-Tenant-ID` from the path. See [Product versioning](./product-versioning.md).
 
 ### Patterns
 

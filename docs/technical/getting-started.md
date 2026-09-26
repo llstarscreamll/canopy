@@ -279,7 +279,7 @@ E2E_BASE_URL=https://app.money-path.co \
 ```
 
 Auth-setup tests call `/api/v1/auth/register-local`. That endpoint is only
-enabled when the target backend is in `local` or `development` mode.
+enabled when the target backend is in `local` mode.
 
 ## Commands
 

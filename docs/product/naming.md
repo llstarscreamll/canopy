@@ -43,6 +43,7 @@ Local Atta origins:
 | Habitat npm root           | `canopy`                                                                 | `/package.json`             |
 | Shared TypeScript          | `@canopy/<pkg>`                                                          | `packages/typescript/<pkg>` |
 | Shared Go (when extracted) | `canopy/pkg/<pkg>`                                                       | `pkg/<pkg>`                 |
+| Atta product SemVer        | `@atta/product`                                                          | `apps/atta`                 |
 | Atta backend (Go module)   | `github.com/atta`                                                        | `apps/atta/backend`         |
 | Atta npm apps              | `@atta/backend`, `@atta/pwa`, `@atta/e2e`, `@atta/infra`, `@atta/onprem` | `apps/atta/*`               |
 
@@ -52,3 +53,4 @@ Canopy shared packages until it is stable and used by more than one
 system.
 
 Layout: [Monorepo layout](../technical/architecture/monorepo.md).
+Versioning: [Product versioning](../technical/architecture/product-versioning.md).

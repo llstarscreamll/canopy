@@ -82,9 +82,13 @@ Do not put product secrets in a Canopy-root `.env`.
 
 ## Workspace globs
 
-- pnpm: `apps/*/*`, `apps/*/deploy/*`, `apps/*/deploy/aws/sdks/neon`,
-  `packages/typescript/*`
+- pnpm: `apps/*`, `apps/*/*`, `apps/*/deploy/*`,
+  `apps/*/deploy/aws/sdks/neon`, `packages/typescript/*`
 - Go: `go.work` lists each product module (`./apps/atta/backend` today)
+
+Product roots (`apps/atta`) are workspace packages so
+`@atta/product` can hold the product SemVer. See
+[Product versioning](./product-versioning.md).
 
 ## What stays shared vs product-owned
 

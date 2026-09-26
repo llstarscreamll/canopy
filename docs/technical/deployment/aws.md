@@ -77,9 +77,11 @@ Generated once and stored in Pulumi state + Parameter Store:
 - Inbox and tenant encryption keys
 - Messaging attestation secret
 
-Pass `GEMINI_API_KEY` (required) and optional OAuth client IDs/secrets
-through `apps/atta/.env` at deploy time. They are copied into the SecureString
-parameter, not Lambda environment variables.
+Pass `GEMINI_API_KEY` (required), `SUPPORT_EMAIL` (required for non-local
+runtimes), and optional OAuth client IDs/secrets through `apps/atta/.env`
+at deploy time. Gemini/OAuth go into the SecureString parameter.
+`SUPPORT_EMAIL` (and optional `TERMS_URL` / `PRIVACY_URL` /
+`LICENSE_LABEL`) are written to SSM and Lambda env for about / health.
 
 ## Neon
 
