@@ -276,15 +276,15 @@ type AppEnv = 'local' | 'staging' | 'production';
               <h3 class="text-xs font-semibold tracking-wide text-muted-foreground uppercase">Cliente (PWA)</h3>
               <div class="mb-3 flex items-center justify-between gap-2">
                 <span class="text-muted-foreground">Entorno</span>
-                <span hlmBadge class="font-mono" [variant]="environmentBadgeVariant(appEnv)">{{ environmentLabel(appEnv) }}</span>
+                <span hlmBadge class="font-mono text-xs" [variant]="environmentBadgeVariant(appEnv)">{{ environmentLabel(appEnv) }}</span>
               </div>
               <dl class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5">
                 <dt class="text-muted-foreground">Versión</dt>
-                <dd class="text-right font-mono">{{ productVersion }}</dd>
+                <dd class="text-right font-mono text-xs">{{ productVersion }}</dd>
                 <dt class="text-muted-foreground">Build</dt>
-                <dd class="text-right font-mono">{{ productBuild }}</dd>
+                <dd class="text-right font-mono text-xs">{{ productBuild }}</dd>
                 <dt class="text-muted-foreground">Revisión</dt>
-                <dd class="text-right font-mono">{{ productRevision }}</dd>
+                <dd class="text-right font-mono text-xs">{{ productRevision }}</dd>
                 <dt class="text-muted-foreground">Fecha de release</dt>
                 <dd class="text-right font-mono text-xs leading-snug">{{ formatReleasedAt(productReleasedAt) }}</dd>
               </dl>
@@ -299,15 +299,15 @@ type AppEnv = 'local' | 'staging' | 'production';
               } @else if (aboutApi(); as api) {
                 <div class="mb-3 flex items-center justify-between gap-2">
                   <span class="text-muted-foreground">Entorno</span>
-                  <span hlmBadge class="font-mono" [variant]="environmentBadgeVariant(api.environment)">{{ environmentLabel(api.environment) }}</span>
+                  <span hlmBadge class="font-mono text-xs" [variant]="environmentBadgeVariant(api.environment)">{{ environmentLabel(api.environment) }}</span>
                 </div>
                 <dl class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5">
                   <dt class="text-muted-foreground">Versión</dt>
-                  <dd class="text-right font-mono">{{ api.version }}</dd>
+                  <dd class="text-right font-mono text-xs">{{ api.version }}</dd>
                   <dt class="text-muted-foreground">Build</dt>
-                  <dd class="text-right font-mono">{{ api.build }}</dd>
+                  <dd class="text-right font-mono text-xs">{{ api.build }}</dd>
                   <dt class="text-muted-foreground">Revisión</dt>
-                  <dd class="text-right font-mono">{{ api.revision }}</dd>
+                  <dd class="text-right font-mono text-xs">{{ api.revision }}</dd>
                   <dt class="text-muted-foreground">Fecha de release</dt>
                   <dd class="text-right font-mono text-xs leading-snug">{{ formatReleasedAt(api.released_at) }}</dd>
                 </dl>
@@ -322,7 +322,7 @@ type AppEnv = 'local' | 'staging' | 'production';
                 <dt class="text-muted-foreground">Soporte</dt>
                 <dd class="text-right">
                   @if (supportEmail(); as email) {
-                    <a class="font-mono text-primary underline-offset-2 hover:underline" [href]="'mailto:' + email">{{ email }}</a>
+                    <a class="font-mono text-xs text-primary underline-offset-2 hover:underline" [href]="'mailto:' + email">{{ email }}</a>
                   } @else {
                     <span class="text-muted-foreground">—</span>
                   }
@@ -518,8 +518,13 @@ export class TenantLayoutComponent implements OnInit {
       return value;
     }
     return new Intl.DateTimeFormat('es-CO', {
-      dateStyle: 'medium',
-      timeStyle: 'medium',
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hourCycle: 'h23',
     }).format(new Date(parsed));
   }
 
