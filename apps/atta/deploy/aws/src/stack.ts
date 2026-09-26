@@ -132,7 +132,7 @@ export function deployStack(cfg: InfraConfig): StackOutputs {
     })
     .apply((v) =>
       JSON.stringify({
-        app_env: cfg.envName,
+        app_env: cfg.appEnv,
         database_url: v.pooled,
         database_direct_url: v.direct,
         sqs_queue_url: v.jobsQueueUrl,
@@ -153,6 +153,10 @@ export function deployStack(cfg: InfraConfig): StackOutputs {
         allowed_origins: `https://${cfg.appDomain},https://${cfg.rootDomain}`,
         frontend_url: `https://${cfg.appDomain}`,
         backend_url: `https://${cfg.appDomain}`,
+        support_email: cfg.supportEmail,
+        terms_url: cfg.termsUrl,
+        privacy_url: cfg.privacyUrl,
+        license_label: cfg.licenseLabel,
       }),
     );
 
@@ -170,13 +174,17 @@ export function deployStack(cfg: InfraConfig): StackOutputs {
 
   const lambdaEnv = {
     DEPLOYMENT_TARGET: 'aws',
-    APP_ENV: cfg.envName,
+    APP_ENV: cfg.appEnv,
     AWS_REGION: cfg.awsRegion,
     SSM_PARAMETER_NAME: secretsParam.name,
     TENANT_MIGRATIONS_DIR: 'migrations/tenant',
     ALLOWED_ORIGINS: `https://${cfg.appDomain},https://${cfg.rootDomain}`,
     FRONTEND_URL: `https://${cfg.appDomain}`,
     BACKEND_URL: `https://${cfg.appDomain}`,
+    SUPPORT_EMAIL: cfg.supportEmail,
+    TERMS_URL: cfg.termsUrl,
+    PRIVACY_URL: cfg.privacyUrl,
+    LICENSE_LABEL: cfg.licenseLabel,
   };
 
   const migrateFn = goLambda(cfg, prefix, 'migrate', 'migrate', key, secretsParam, lambdaDlq, lambdaEnv, awsOpts, {

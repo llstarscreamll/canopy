@@ -32,6 +32,11 @@ export interface InfraConfig {
   microsoftClientId: string;
   microsoftClientSecret: string;
   alarmEmail?: string;
+  supportEmail: string;
+  termsUrl: string;
+  privacyUrl: string;
+  licenseLabel: string;
+  appEnv: 'local' | 'staging' | 'production';
   repoRoot: string;
   webBuildPath: string;
   lambdaBuildDir: string;
@@ -85,6 +90,24 @@ export function loadConfig(): InfraConfig {
     microsoftClientId: optional('MICROSOFT_CLIENT_ID'),
     microsoftClientSecret: optional('MICROSOFT_CLIENT_SECRET'),
     alarmEmail: optional('ALARM_EMAIL') || undefined,
+    supportEmail: required('SUPPORT_EMAIL'),
+    termsUrl: optional('TERMS_URL'),
+    privacyUrl: optional('PRIVACY_URL'),
+    licenseLabel: optional('LICENSE_LABEL', 'Software propietario'),
+    // ENV is the Pulumi stack slug (staging|prod). APP_ENV is the product channel.
+    appEnv: (() => {
+      if (envName === 'staging') {
+        return 'staging' as const;
+      }
+      if (envName === 'local') {
+        return 'local' as const;
+      }
+      // Existing AWS stacks use ENV=prod; product channel is production.
+      if (envName === 'prod' || envName === 'production') {
+        return 'production' as const;
+      }
+      throw new Error('ENV must be local|staging|prod|production');
+    })(),
     repoRoot,
     webBuildPath: path.join(repoRoot, 'apps/atta/pwa/dist/pwa/browser'),
     lambdaBuildDir: path.join(__dirname, '..', '.build', 'lambda'),
