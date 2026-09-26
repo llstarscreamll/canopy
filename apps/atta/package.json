@@ -1,0 +1,15 @@
+{
+  "name": "@atta/product",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Atta product metadata. version is the SemVer source of truth for all Atta surfaces.",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "sync-version": "node ./scripts/sync-version.mjs",
+    "lint": "node ./scripts/sync-version.mjs --check"
+  }
+}

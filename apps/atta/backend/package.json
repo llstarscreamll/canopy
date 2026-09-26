@@ -9,6 +9,7 @@
     "dev:jobs-consumer": "../../../scripts/with-env.sh air -c .air.worker-jobs.toml",
     "dev:scheduler": "../../../scripts/with-env.sh air -c .air.worker-scheduler.toml",
     "seed": "../../../scripts/with-env.sh go run ./cmd/onprem/seed",
+    "prebuild": "pnpm --filter @atta/product sync-version",
     "build": "mkdir -p bin && go build -o bin/api ./cmd/onprem/api && go build -o bin/relay ./cmd/onprem/relay && go build -o bin/events-consumer ./cmd/onprem/events-consumer && go build -o bin/jobs-consumer ./cmd/onprem/jobs-consumer && go build -o bin/scheduler ./cmd/onprem/scheduler && go build -o bin/lambda-http ./cmd/aws/lambda/http && go build -o bin/lambda-sqs ./cmd/aws/lambda/sqs && go build -o bin/lambda-eventbridge ./cmd/aws/lambda/eventbridge && go build -o bin/lambda-outbox-relay ./cmd/aws/lambda/outbox-relay && go build -o bin/lambda-scheduler ./cmd/aws/lambda/scheduler && go build -o bin/migrate ./cmd/onprem/migrate && go build -o bin/seed ./cmd/onprem/seed",
     "migrate:controlplane": "../../../scripts/with-env.sh ./bin/migrate -target controlplane",
     "migrate:tenants": "../../../scripts/with-env.sh ./bin/migrate -target tenants",

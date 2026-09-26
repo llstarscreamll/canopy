@@ -21,6 +21,8 @@ importers:
         specifier: ^2.0.12
         version: 2.9.14
 
+  apps/atta: {}
+
   apps/atta/backend: {}
 
   apps/atta/deploy/aws:
@@ -126,6 +128,9 @@ importers:
       '@angular/service-worker':
         specifier: ^21.2.0
         version: 21.2.14(@angular/core@21.2.14(@angular/compiler@21.2.14)(rxjs@7.8.2)(zone.js@0.15.1))(rxjs@7.8.2)
+      '@atta/product':
+        specifier: workspace:*
+        version: link:..
       '@canopy/system-notices':
         specifier: workspace:*
         version: link:../../../packages/typescript/system-notices

@@ -1,4 +1,5 @@
 packages:
+  - apps/*
   - apps/*/*
   - apps/*/deploy/*
   - apps/*/deploy/aws/sdks/neon

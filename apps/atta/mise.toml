@@ -1,6 +1,14 @@
 [env]
 ENV_FILE = "apps/atta/.env"
 
+[tasks."version:sync"]
+description = "Sync product SemVer into @atta/* packages and Go constant"
+run = "pnpm --filter @atta/product sync-version"
+
+[tasks."version:check"]
+description = "Fail if product SemVer drifted from child packages / Go"
+run = "pnpm --filter @atta/product lint"
+
 [tasks."infra:up"]
 description = "Start Atta Compose (Postgres, RabbitMQ, MinIO, Caddy)"
 run = "scripts/infra-up.sh"

@@ -1,11 +1,12 @@
 {
   "name": "canopy",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.0.0",
   "engines": {
     "node": "24.x"
   },
   "workspaces": [
+    "apps/*",
     "apps/*/*",
     "apps/*/deploy/*",
     "apps/*/deploy/aws/sdks/neon",

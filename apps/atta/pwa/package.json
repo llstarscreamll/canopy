@@ -4,12 +4,14 @@
   "version": "0.1.0",
   "scripts": {
     "dev": "bash scripts/dev.sh",
+    "prebuild": "pnpm --filter @atta/product sync-version",
     "build": "ng build",
     "preview:web": "http-server ./dist/pwa/browser -p 4300 -c-1",
     "test": "ng test --watch=false",
     "lint": "tsc -p tsconfig.app.json --noEmit && tsc -p tsconfig.spec.json --noEmit && ng lint"
   },
   "dependencies": {
+    "@atta/product": "workspace:*",
     "@canopy/system-notices": "workspace:*",
     "@angular/cdk": "^21.2.0",
     "@angular/common": "^21.2.0",

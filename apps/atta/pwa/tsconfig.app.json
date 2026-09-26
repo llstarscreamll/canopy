@@ -5,6 +5,6 @@
     "outDir": "./out-tsc/app",
     "types": []
   },
-  "include": ["src/main.ts", "src/app/**/*.ts", "src/app/shared/ui/**/src/**/*.ts", "../../../packages/typescript/system-notices/src/**/*.ts"],
+  "include": ["src/main.ts", "src/app/**/*.ts", "src/app/shared/ui/**/src/**/*.ts", "../src/**/*.ts", "../package.json", "../../../packages/typescript/system-notices/src/**/*.ts"],
   "exclude": ["src/**/*.spec.ts"]
 }
