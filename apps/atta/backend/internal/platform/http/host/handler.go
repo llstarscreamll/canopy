@@ -37,7 +37,7 @@ func New(deps *platform.Dependencies) (http.Handler, error) {
 	tenantsDbRegistry := deps.TenantRegistry
 	mux := http.NewServeMux()
 
-	healthApp := health.NewApplication(pool)
+	healthApp := health.NewApplication(pool, cfg)
 	health.NewHTTPHandler(mux, healthApp, cfg)
 
 	tokenGen := auth.NewTokenGenerator(cfg.JWT.AccessSecret, cfg.JWT.RefreshSecret, cfg.JWT.AccessTTL, cfg.JWT.RefreshTTL)

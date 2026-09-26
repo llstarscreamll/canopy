@@ -24,7 +24,7 @@ func NewLoginLocalCommand(
 	return &LoginLocalCommand{
 		repo:         repo,
 		sessions:     newSessionIssuer(repo, tokenGen, refreshStore, operatorEmails),
-		localEnabled: appEnv == "local" || appEnv == "development",
+		localEnabled: appEnv == "local",
 	}
 }
 

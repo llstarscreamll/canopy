@@ -2,6 +2,7 @@ package health
 
 import (
 	"net/http"
+	"strings"
 
 	httpV1 "github.com/atta/internal/health/adapters/http/v1"
 	healthRepo "github.com/atta/internal/health/adapters/repository/postgres"
@@ -11,18 +12,35 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func NewApplication(db *pgxpool.Pool) *application.Application {
+func NewApplication(db *pgxpool.Pool, cfg config.Config) *application.Application {
 	if db == nil {
 		panic("database pool is required")
 	}
 
 	repo := healthRepo.NewPostgresRepository(db)
+	about := queries.AboutInfo{
+		Environment:  cfg.AppEnv,
+		SupportEmail: resolveSupportEmail(cfg),
+		TermsURL:     cfg.TermsURL,
+		PrivacyURL:   cfg.PrivacyURL,
+		LicenseLabel: cfg.LicenseLabel,
+	}
 
 	return &application.Application{
 		Queries: application.Queries{
-			CheckHealth: queries.NewCheckHealthQuery(repo),
+			CheckHealth: queries.NewCheckHealthQuery(repo, about),
 		},
 	}
+}
+
+func resolveSupportEmail(cfg config.Config) string {
+	if email := strings.TrimSpace(cfg.SupportEmail); email != "" {
+		return email
+	}
+	if cfg.AppEnv == config.AppEnvLocal {
+		return "soporte@atta.com"
+	}
+	return ""
 }
 
 func NewHTTPHandler(mux *http.ServeMux, app *application.Application, cfg config.Config) *httpV1.Router {

@@ -48,6 +48,10 @@ type Config struct {
 	MessagingAttestationSecret    string    `json:"messaging_attestation_secret"`
 	FrontendURL                   string    `json:"frontend_url"`
 	BackendURL                    string    `json:"backend_url"`
+	SupportEmail                  string    `json:"support_email"`
+	TermsURL                      string    `json:"terms_url"`
+	PrivacyURL                    string    `json:"privacy_url"`
+	LicenseLabel                  string    `json:"license_label"`
 	PlatformOperatorEmails        []string  `json:"-"`
 	JWT                           JWTConfig `json:"-"`
 }
@@ -62,6 +66,10 @@ type JWTConfig struct {
 const (
 	DeploymentTargetAWS    = "aws"
 	DeploymentTargetOnPrem = "onprem"
+
+	AppEnvLocal      = "local"
+	AppEnvStaging    = "staging"
+	AppEnvProduction = "production"
 )
 
 func Load(ctx context.Context) (Config, error) {
@@ -70,8 +78,17 @@ func Load(ctx context.Context) (Config, error) {
 		return Config{}, fmt.Errorf("invalid DEPLOYMENT_TARGET: %q", deploymentTarget)
 	}
 
+	rawAppEnv, ok := os.LookupEnv("APP_ENV")
+	if !ok || strings.TrimSpace(rawAppEnv) == "" {
+		return Config{}, fmt.Errorf("APP_ENV is required (local|staging|production)")
+	}
+	appEnv, err := NormalizeAppEnv(rawAppEnv)
+	if err != nil {
+		return Config{}, err
+	}
+
 	cfg := Config{
-		AppEnv:                 getEnv("APP_ENV", "development"),
+		AppEnv:                 appEnv,
 		DeploymentTarget:       deploymentTarget,
 		Port:                   getEnv("PORT", "8080"),
 		AWSRegion:              getEnv("AWS_REGION", "us-east-1"),
@@ -84,11 +101,14 @@ func Load(ctx context.Context) (Config, error) {
 		AllowedOrigins:         getEnv("ALLOWED_ORIGINS", "https://app.atta.dev,http://app.atta.dev,http://localhost:4200"),
 		FrontendURL:            getEnv("FRONTEND_URL", "https://app.atta.dev"),
 		BackendURL:             getEnv("BACKEND_URL", "https://app.atta.dev"),
+		SupportEmail:           strings.TrimSpace(os.Getenv("SUPPORT_EMAIL")),
+		TermsURL:               strings.TrimSpace(os.Getenv("TERMS_URL")),
+		PrivacyURL:             strings.TrimSpace(os.Getenv("PRIVACY_URL")),
+		LicenseLabel:           getEnv("LICENSE_LABEL", "Software propietario"),
 		PlatformOperatorEmails: parseCSVList(os.Getenv("PLATFORM_OPERATOR_EMAILS")),
 	}
 
-	defaultDebug := cfg.AppEnv == "development" || cfg.AppEnv == "local"
-	cfg.Debug = getEnvAsBool("DEBUG", defaultDebug)
+	cfg.Debug = getEnvAsBool("DEBUG", cfg.AppEnv == AppEnvLocal)
 
 	if cfg.DeploymentTarget == DeploymentTargetAWS {
 		cfg.SSMParameterName = os.Getenv("SSM_PARAMETER_NAME")
@@ -102,6 +122,16 @@ func Load(ctx context.Context) (Config, error) {
 		if err := loadSSMSecrets(ctx, awsCfg, cfg.AWSEndpointURL, &cfg); err != nil {
 			return cfg, fmt.Errorf("load ssm secrets: %w", err)
 		}
+		// Prefer Lambda env for channel + about metadata over SSM zeros / legacy values.
+		if envApp := strings.TrimSpace(os.Getenv("APP_ENV")); envApp != "" {
+			cfg.AppEnv = envApp
+		}
+		normalized, normErr := NormalizeAppEnv(cfg.AppEnv)
+		if normErr != nil {
+			return cfg, normErr
+		}
+		cfg.AppEnv = normalized
+		applyAboutEnvOverrides(&cfg)
 	}
 
 	// Fallback to env vars
@@ -162,10 +192,8 @@ func Load(ctx context.Context) (Config, error) {
 		panic("GEMINI_API_KEY is required (from secrets or env)")
 	}
 
-	if cfg.MessagingAttestationSecret == "" {
-		if cfg.AppEnv == "local" || cfg.AppEnv == "development" {
-			cfg.MessagingAttestationSecret = localMessagingAttestation
-		}
+	if cfg.MessagingAttestationSecret == "" && cfg.AppEnv == AppEnvLocal {
+		cfg.MessagingAttestationSecret = localMessagingAttestation
 	}
 
 	if err := validateSecurityConfig(cfg); err != nil {
@@ -174,7 +202,7 @@ func Load(ctx context.Context) (Config, error) {
 
 	accessSecret := firstNonEmpty(os.Getenv("JWT_ACCESS_SECRET"), cfg.JWTAccessSecret)
 	if accessSecret == "" {
-		if cfg.AppEnv == "local" || cfg.AppEnv == "development" {
+		if cfg.AppEnv == AppEnvLocal {
 			accessSecret = "local-dev-access-secret-do-not-use-in-prod"
 		} else {
 			panic("JWT_ACCESS_SECRET is required")
@@ -183,7 +211,7 @@ func Load(ctx context.Context) (Config, error) {
 
 	refreshSecret := firstNonEmpty(os.Getenv("JWT_REFRESH_SECRET"), cfg.JWTRefreshSecret)
 	if refreshSecret == "" {
-		if cfg.AppEnv == "local" || cfg.AppEnv == "development" {
+		if cfg.AppEnv == AppEnvLocal {
 			refreshSecret = "local-dev-refresh-secret-do-not-use-in-prod"
 		} else {
 			panic("JWT_REFRESH_SECRET is required")
@@ -243,8 +271,11 @@ func validateSecurityConfig(cfg Config) error {
 	if cfg.MessagingAttestationSecret == "" {
 		return fmt.Errorf("MESSAGING_ATTESTATION_SECRET is required")
 	}
-	if cfg.AppEnv == "local" {
+	if cfg.AppEnv == AppEnvLocal {
 		return nil
+	}
+	if strings.TrimSpace(cfg.SupportEmail) == "" {
+		return fmt.Errorf("SUPPORT_EMAIL is required outside APP_ENV=local")
 	}
 	if cfg.InboxCredentialsEncryptionKey == exampleInboxCredentialsKey {
 		return fmt.Errorf("INBOX_CREDENTIALS_ENCRYPTION_KEY must not use the example value outside APP_ENV=local")
@@ -256,6 +287,38 @@ func validateSecurityConfig(cfg Config) error {
 		return fmt.Errorf("MESSAGING_ATTESTATION_SECRET must not use the local default outside APP_ENV=local")
 	}
 	return nil
+}
+
+func applyAboutEnvOverrides(cfg *Config) {
+	if email := strings.TrimSpace(os.Getenv("SUPPORT_EMAIL")); email != "" {
+		cfg.SupportEmail = email
+	}
+	if terms := strings.TrimSpace(os.Getenv("TERMS_URL")); terms != "" {
+		cfg.TermsURL = terms
+	}
+	if privacy := strings.TrimSpace(os.Getenv("PRIVACY_URL")); privacy != "" {
+		cfg.PrivacyURL = privacy
+	}
+	if label := strings.TrimSpace(os.Getenv("LICENSE_LABEL")); label != "" {
+		cfg.LicenseLabel = label
+	}
+}
+
+// NormalizeAppEnv returns the canonical channel: local, staging, or production.
+// Empty or unknown values are an error (no aliases).
+func NormalizeAppEnv(raw string) (string, error) {
+	switch strings.ToLower(strings.TrimSpace(raw)) {
+	case AppEnvLocal:
+		return AppEnvLocal, nil
+	case AppEnvStaging:
+		return AppEnvStaging, nil
+	case AppEnvProduction:
+		return AppEnvProduction, nil
+	case "":
+		return "", fmt.Errorf("APP_ENV is required (local|staging|production)")
+	default:
+		return "", fmt.Errorf("APP_ENV must be local|staging|production, got %q", raw)
+	}
 }
 
 func loadSSMSecrets(ctx context.Context, awsCfg aws.Config, endpointURL string, cfg *Config) error {
