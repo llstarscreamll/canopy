@@ -1,7 +1,8 @@
 monorepo_root = true
 
 # Product daily tasks live in apps/<product>/mise.toml.
-# From anywhere:  mise //apps/atta:dev
+# Habitat infra tasks live in infra/*/mise.toml.
+# From anywhere:  mise //apps/atta:dev  |  mise //infra/landing-zone:up
 # From apps/atta: mise :dev
 
 [tools]
@@ -13,4 +14,4 @@ air = "latest"
 pulumi = "latest"
 
 [monorepo]
-config_roots = ["apps/*"]
+config_roots = ["apps/*", "infra/*"]

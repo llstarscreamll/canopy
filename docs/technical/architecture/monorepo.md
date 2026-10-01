@@ -7,19 +7,22 @@ for why those names exist.
 ```text
 canopy/
 ├── go.work                      # Local Go modules
-├── pnpm-workspace.yaml          # Angular, deploy, TS libs
+├── pnpm-workspace.yaml          # Angular, deploy, TS libs, infra
 ├── pkg/                         # Shared Go (extract here when stable)
 ├── packages/
 │   ├── typescript/              # Shared Angular / TypeScript (`@canopy/*`)
 │   ├── swift/                   # Shared Swift packages (iOS)
 │   └── kotlin/                  # Shared Gradle builds (Android)
+├── infra/
+│   └── landing-zone/            # AWS Organizations multi-account bootstrap
 └── apps/
     └── atta/                    # Current commercial system
         ├── mise.toml            # Daily tasks (`mise :dev`)
         ├── docker-compose.yml   # Local Atta infra (Compose project `atta`)
         ├── Caddyfile            # app.atta.dev / media.atta.dev
-        ├── .env.example         # Product dotenv template
+        ├── .env.example         # App runtime dotenv template
         ├── .env.test.example    # Isolated test loop template
+        ├── .env.deploy.example  # Pulumi deploy dotenv template
         ├── backend/             # Independent Go module `github.com/atta`
         │   ├── cmd/aws/lambda/  # http, sqs, eventbridge, outbox-relay, scheduler, migrate
         │   ├── cmd/onprem/      # api, relay, workers, migrate, seed
@@ -34,7 +37,9 @@ canopy/
 Future products (`threehopper`, `kinglet`, `bowerbird`, …) follow the
 same `apps/<product>/` shape: backend, pwa, desktop, mobile, deploy,
 plus that product's `docker-compose.yml`, `Caddyfile`, and dotenv
-templates. Canopy does not own a root Compose file.
+templates. Canopy does not own a root Compose file. Habitat AWS org
+bootstrap lives under `infra/landing-zone` — see
+[Organizations landing zone](../deployment/organizations.md).
 
 ## Daily commands
 
@@ -69,12 +74,13 @@ keys so a parent shell cannot leak the wrong product.
 
 | File                           | Use for                                                             |
 | ------------------------------ | ------------------------------------------------------------------- |
-| `apps/atta/.env`               | Daily local stack (`mise //apps/atta:dev`), Pulumi, ad-hoc e2e      |
+| `apps/atta/.env`               | Daily local stack (`mise //apps/atta:dev`), ad-hoc e2e              |
 | `apps/atta/.env.test`          | `mise //apps/atta:test:full` only (copied from `.env.test.example`) |
-| `apps/atta/.env.aws`           | Optional AWS deploy file (`ENV_FILE=apps/atta/.env.aws`)            |
+| `apps/atta/.env.deploy`        | `mise //apps/atta:deploy*` (Pulumi AWS + on-prem fleet operator)    |
 | `apps/atta/deploy/onprem/.env` | Per client VM Compose secrets (not `ENV_FILE`)                      |
 
-Default `ENV_FILE` is `apps/atta/.env`. Point it at another product
+Default `ENV_FILE` for app/runtime loaders is `apps/atta/.env`. Deploy
+tasks set `ENV_FILE=apps/atta/.env.deploy`. Point it at another product
 when that product exists, for example
 `ENV_FILE=apps/threehopper/.env`.
 

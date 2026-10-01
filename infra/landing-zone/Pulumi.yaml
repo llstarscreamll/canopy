@@ -1,0 +1,6 @@
+name: landing-zone
+runtime:
+  name: nodejs
+  options:
+    typescript: true
+description: AWS Organizations landing zone (one management root per run)

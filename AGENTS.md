@@ -13,8 +13,8 @@
 
 - Run `mise install` first. Versions are pinned: Node `24`, Go `1.25`, pnpm `11.5` (`.mise.toml`, `.nvmrc`, root `package.json`, `apps/atta/backend/go.mod`).
 - This repo is **Canopy** (habitat). Products live under `apps/<product>/`. The current product is **Atta** (`apps/atta`). Shared TypeScript is `@canopy/*` in `packages/typescript/`. See [Naming](docs/product/naming.md).
-- Use `pnpm` only. Workspace roots are `apps/*`, `apps/*/*`, `apps/*/deploy/*`, `apps/*/deploy/aws/sdks/neon`, and `packages/typescript/*` (`pnpm-workspace.yaml`), orchestrated by Turbo (`turbo.json`).
-- Env files live per product under `apps/<product>/`. `ENV_FILE` is relative to the repo root (default `apps/atta/.env`). Loaders (`scripts/with-env.sh`, Playwright, Pulumi) honor it and override existing keys. Daily Atta work uses `apps/atta/.env`; the full test loop uses `apps/atta/.env.test` (from `.env.test.example`). Turbo uses `envMode: loose` + `globalDependencies: ["apps/*/.env", "apps/*/.env.test"]`. Keep `apps/atta/deploy/onprem/.env` on each client VM (Compose secrets). Do not commit `apps/atta/deploy/onprem/hosts.json`.
+- Use `pnpm` only. Workspace roots are `apps/*/*`, `apps/*/deploy/*`, `apps/*/deploy/aws/sdks/neon`, `packages/typescript/*`, and `infra/*` (`pnpm-workspace.yaml`), orchestrated by Turbo (`turbo.json`).
+- Env files live per product under `apps/<product>/`. `ENV_FILE` is relative to the repo root. Defaults: app runtime `apps/atta/.env`; `mise //apps/atta:test:full` uses `apps/atta/.env.test`; `mise //apps/atta:deploy*` uses `apps/atta/.env.deploy`. Landing zone uses `infra/landing-zone/.env` (see [Organizations landing zone](docs/technical/deployment/organizations.md)). Loaders (`scripts/with-env.sh`, Playwright, Pulumi) honor `ENV_FILE` and override existing keys. Templates: `.env.example`, `.env.test.example`, `.env.deploy.example`. Turbo uses `envMode: loose` + `globalDependencies: ["apps/*/.env", "apps/*/.env.test", "apps/*/.env.deploy"]`. Keep `apps/atta/deploy/onprem/.env` on each client VM (Compose secrets). Do not commit `apps/atta/deploy/onprem/hosts.json`.
 
 ## Commands that matter
 
@@ -25,13 +25,14 @@ Product daily tasks live in `apps/<product>/mise.toml`. From anywhere:
 - **Full test suite (canonical verification)**: `mise //apps/atta:test:full`. Runs the entire local loop — wipe Postgres, load `apps/atta/.env.test`, migrate/seed, Go tests (`go test ./...`), PWA unit tests, then e2e (`desktop-chromium` + `http`; WebKit skipped). Stop `mise //apps/atta:dev` first (script fails if the API is already up). Destroys local Postgres data. **After implementing or fixing behavior, verify with this command**; do not substitute package-scoped `go test -run …` or partial e2e. Success: exit **0** and `[test:full] Done`. Script: `apps/atta/scripts/test-full.sh`. Full browser matrix (incl. WebKit): `mise //apps/atta:test:e2e:install:all` then `mise //apps/atta:test:e2e`.
 - Fast unit/integration only (no DB reset, no e2e): `pnpm run test`.
 - Habitat verification without e2e: `pnpm run lint && pnpm run test && pnpm run build`.
-- Atta deploy: `mise //apps/atta:deploy` (AWS + on-prem in parallel). Use `deploy:aws` / `deploy:onprem` for one track. On-prem skips if `apps/atta/deploy/onprem/hosts.json` is missing or empty.
+- Atta deploy: `mise //apps/atta:deploy` (AWS + on-prem in parallel; loads `apps/atta/.env.deploy`). Use `deploy:aws` / `deploy:onprem` for one track. On-prem skips if `apps/atta/deploy/onprem/hosts.json` is missing or empty.
 - Backend targeted: `pnpm --filter @atta/backend dev|lint|test|build|migrate:all`.
 - Backend tests: always `pnpm --filter @atta/backend test` (full `go test ./...`). Never verify with package-scoped or `-run` filtered `go test`.
 - PWA targeted: `pnpm --filter @atta/pwa dev|lint|test|build`.
 - E2E targeted: `pnpm --filter @atta/e2e lint|test:e2e|test:e2e:local|test:e2e:browser|test:e2e:http|test:e2e:ui`.
 - AWS deploy (`apps/atta/deploy/aws`, `@atta/infra`): `pnpm --filter @atta/infra lint|test|build|synth|deploy|migrate`. `deploy` invokes the migrate Lambda when that package changes, then publishes the other Lambdas and web assets.
 - On-prem fleet (`apps/atta/deploy/onprem`, `@atta/onprem`): `pnpm --filter @atta/onprem lint|test|synth|deploy`. Pulumi SSHs each inventory host and loads Compose images tagged `ONPREM_RELEASE`.
+- AWS Organizations landing zone (`infra/landing-zone`, `@canopy/landing-zone`): occasional manual bootstrap — `mise //infra/landing-zone:preview|up|test`. Not wired to CI. See [Organizations landing zone](docs/technical/deployment/organizations.md).
 
 ## Backend (`apps/atta/backend`)
 
@@ -86,7 +87,7 @@ Product daily tasks live in `apps/<product>/mise.toml`. From anywhere:
 
 - `apps/atta/docker-compose.yml` runs Postgres `5432`, RabbitMQ `5672`, MinIO `9000/9001`, Caddy `80/443`.
 - `apps/atta/Caddyfile` maps `app.atta.dev` → Angular `:4200`, `app.atta.dev/api*` → Go API `:8080`, and `media.atta.dev` → MinIO `:9000`; use `app.atta.dev` locally for cookie/routing behavior.
-- AWS Pulumi entrypoint is `apps/atta/deploy/aws/index.ts` (`@atta/infra`) and loads `apps/atta/.env`:
+- AWS Pulumi entrypoint is `apps/atta/deploy/aws/index.ts` (`@atta/infra`) and loads `apps/atta/.env.deploy`:
   - `ENV`, `AWS_ACCOUNT_ID`, `ROOT_DOMAIN`, `CLOUDFLARE_API_TOKEN`, `NEON_API_KEY`, `NEON_PROJECT_ID`, and `GEMINI_API_KEY` must be set.
   - `AWS_REGION` must be `us-east-1` (CloudFront certificates and CloudFront WAF).
   - Postgres is Neon (not RDS). DNS is Cloudflare.

@@ -1,0 +1,22 @@
+[env]
+ENV_FILE = "infra/landing-zone/.env"
+
+[tasks.preview]
+description = "Pulumi preview for the active management root (.env + AWS credentials)"
+dir = "{{config_root}}/../.."
+run = "bash scripts/with-env.sh pnpm --filter @canopy/landing-zone run preview"
+
+[tasks.up]
+description = "Apply landing zone (OUs, accounts, SCPs, SSO sets) for the active management root"
+dir = "{{config_root}}/../.."
+run = "bash scripts/with-env.sh pnpm --filter @canopy/landing-zone run up"
+
+[tasks.test]
+description = "Pulumi mock + SCP policy unit tests"
+dir = "{{config_root}}/../.."
+run = "pnpm --filter @canopy/landing-zone test"
+
+[tasks.lint]
+description = "Typecheck landing zone package"
+dir = "{{config_root}}/../.."
+run = "pnpm --filter @canopy/landing-zone lint"

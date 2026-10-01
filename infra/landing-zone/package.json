@@ -1,0 +1,22 @@
+{
+  "name": "@canopy/landing-zone",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "tsc -p tsconfig.test.json && node --test dist-test/src/policies.test.js dist-test/src/sso-policies.test.js dist-test/src/stack.test.js",
+    "lint": "tsc -p tsconfig.json --noEmit",
+    "detach-root-leave": "node ./scripts/detach-root-leave-scp.mjs",
+    "preview": "node ./scripts/detach-root-leave-scp.mjs && pulumi stack select --create \"$ORGANIZATION_NAME\" && pulumi preview",
+    "up": "node ./scripts/detach-root-leave-scp.mjs && pulumi stack select --create \"$ORGANIZATION_NAME\" && pulumi up --yes"
+  },
+  "dependencies": {
+    "@pulumi/aws": "^7.48.0",
+    "@pulumi/pulumi": "^3.265.0",
+    "dotenv": "^16.6.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.0",
+    "typescript": "^5.9.3"
+  }
+}
