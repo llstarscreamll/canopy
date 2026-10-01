@@ -152,7 +152,7 @@ describe('buildLandingZone (Pulumi mocks)', () => {
     await settle();
 
     assert.equal(registrations.filter((r) => r.type === 'aws:cloudtrail/trail:Trail').length, 1);
-    assert.ok(registrations.some((r) => r.type === 'aws:s3/bucketV2:BucketV2'));
+    assert.ok(registrations.some((r) => r.type === 'aws:s3/bucket:Bucket'));
     assert.ok(registrations.some((r) => r.type === 'aws:guardduty/organizationAdminAccount:OrganizationAdminAccount'));
     assert.ok(registrations.some((r) => r.type === 'aws:guardduty/detector:Detector'));
     assert.ok(

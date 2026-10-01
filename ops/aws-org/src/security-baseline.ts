@@ -50,7 +50,7 @@ export function wireSecurityBaseline(args: SecurityBaselineArgs): {
   });
   const secOpts: pulumi.ResourceOptions = { provider: securityToolingProvider };
 
-  const trailBucket = new aws.s3.BucketV2(
+  const trailBucket = new aws.s3.Bucket(
     n('org-trail-bucket'),
     {
       bucket: pulumi.interpolate`${cfg.organizationName}-org-cloudtrail-${args.logArchiveAccountId}`,
@@ -61,7 +61,7 @@ export function wireSecurityBaseline(args: SecurityBaselineArgs): {
         Purpose: 'org-cloudtrail',
       },
     },
-    logOpts,
+    { ...logOpts, aliases: [{ type: 'aws:s3/bucketV2:BucketV2' }] },
   );
 
   new aws.s3.BucketOwnershipControls(
@@ -85,16 +85,19 @@ export function wireSecurityBaseline(args: SecurityBaselineArgs): {
     logOpts,
   );
 
-  new aws.s3.BucketVersioningV2(
+  new aws.s3.BucketVersioning(
     n('org-trail-bucket-versioning'),
     {
       bucket: trailBucket.id,
       versioningConfiguration: { status: 'Enabled' },
     },
-    logOpts,
+    {
+      ...logOpts,
+      aliases: [{ type: 'aws:s3/bucketVersioningV2:BucketVersioningV2' }],
+    },
   );
 
-  new aws.s3.BucketServerSideEncryptionConfigurationV2(
+  new aws.s3.BucketServerSideEncryptionConfiguration(
     n('org-trail-bucket-sse'),
     {
       bucket: trailBucket.id,
@@ -107,10 +110,13 @@ export function wireSecurityBaseline(args: SecurityBaselineArgs): {
         },
       ],
     },
-    logOpts,
+    {
+      ...logOpts,
+      aliases: [{ type: 'aws:s3/bucketServerSideEncryptionConfigurationV2:BucketServerSideEncryptionConfigurationV2' }],
+    },
   );
 
-  new aws.s3.BucketLifecycleConfigurationV2(
+  new aws.s3.BucketLifecycleConfiguration(
     n('org-trail-bucket-lifecycle'),
     {
       bucket: trailBucket.id,
@@ -126,7 +132,10 @@ export function wireSecurityBaseline(args: SecurityBaselineArgs): {
         },
       ],
     },
-    logOpts,
+    {
+      ...logOpts,
+      aliases: [{ type: 'aws:s3/bucketLifecycleConfigurationV2:BucketLifecycleConfigurationV2' }],
+    },
   );
 
   const trailName = `${cfg.organizationName}-org-trail`;
