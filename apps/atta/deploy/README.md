@@ -13,7 +13,9 @@ of client IPs. Turbo runs both `deploy` tasks at the same time.
 `apps/atta/deploy/onprem/hosts.json` is missing or empty, the on-prem track
 skips.
 
-Backend and PWA live in `apps/atta/backend` and `apps/atta/pwa`.
+Deploy commands load `apps/atta/.env.deploy` by default (see
+`.env.deploy.example`). Backend and PWA live in `apps/atta/backend` and
+`apps/atta/pwa`.
 
 ## AWS
 
@@ -22,11 +24,13 @@ Create the Neon project once in the Neon Console; the stack only looks it
 up (`NEON_PROJECT_ID`).
 
 ```bash
+cp apps/atta/.env.deploy.example apps/atta/.env.deploy
+# fill ENV, AWS_ACCOUNT_ID, ROOT_DOMAIN, Cloudflare, Neon, Gemini, SUPPORT_EMAIL
 mise //apps/atta:deploy:aws
 ```
 
-Do not deploy with the local MinIO dummy `AWS_ACCESS_KEY_ID`. Use
-`ENV_FILE=apps/atta/.env.aws` or an AWS profile. Missing stacks are created by
+Do not put local MinIO dummy `AWS_ACCESS_KEY_ID` in `.env.deploy`. Use
+SSO or `~/.aws/credentials`. Missing stacks are created by
 `pulumi stack select --create "$ENV"`.
 
 GitHub Actions on `develop` deploys the `staging` stack via OIDC:
@@ -43,7 +47,7 @@ VM.
 
 ```bash
 cp apps/atta/deploy/onprem/hosts.example.json apps/atta/deploy/onprem/hosts.json
-# set ONPREM_RELEASE, ONPREM_SSH_KEY_PATH in apps/atta/.env
+# set ONPREM_RELEASE, ONPREM_SSH_KEY_PATH in apps/atta/.env.deploy
 mise //apps/atta:deploy:onprem
 ```
 

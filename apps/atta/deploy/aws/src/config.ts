@@ -3,8 +3,9 @@ import * as path from 'node:path';
 import dotenv from 'dotenv';
 
 const repoRoot = path.resolve(__dirname, '../../../../..');
+const defaultEnvFile = 'apps/atta/.env.deploy';
 const envFileRaw = process.env.ENV_FILE?.trim();
-const envPath = envFileRaw ? (path.isAbsolute(envFileRaw) ? envFileRaw : path.resolve(repoRoot, envFileRaw)) : path.join(repoRoot, 'apps/atta/.env');
+const envPath = envFileRaw ? (path.isAbsolute(envFileRaw) ? envFileRaw : path.resolve(repoRoot, envFileRaw)) : path.join(repoRoot, defaultEnvFile);
 if (fs.existsSync(envPath)) {
   dotenv.config({ path: envPath });
 }
@@ -45,7 +46,7 @@ export interface InfraConfig {
 function required(name: string): string {
   const value = process.env[name]?.trim();
   if (!value) {
-    throw new Error(`${name} is required in ${process.env.ENV_FILE?.trim() || 'apps/atta/.env'}`);
+    throw new Error(`${name} is required in ${process.env.ENV_FILE?.trim() || 'apps/atta/.env.deploy'}`);
   }
   return value;
 }

@@ -238,10 +238,10 @@ deploys to `us-east-1`.
 
 ## What GitHub does not own
 
-| Concern                 | Where it lives                                            |
-| ----------------------- | --------------------------------------------------------- |
-| Pulumi stack state      | Pulumi Cloud (`atta` / `staging`)                         |
-| JWT and encryption keys | Pulumi state + SSM `/atta/staging/secrets`                |
-| Neon project lifecycle  | Neon Console (`NEON_PROJECT_ID` is lookup-only)           |
-| On-prem fleet           | Not in these workflows                                    |
-| Local deploy            | `ENV_FILE=apps/atta/.env.aws mise //apps/atta:deploy:aws` |
+| Concern                 | Where it lives                                                |
+| ----------------------- | ------------------------------------------------------------- |
+| Pulumi stack state      | Pulumi Cloud (`atta` / `staging`)                             |
+| JWT and encryption keys | Pulumi state + SSM `/atta/staging/secrets`                    |
+| Neon project lifecycle  | Neon Console (`NEON_PROJECT_ID` is lookup-only)               |
+| On-prem fleet           | Not in these workflows                                        |
+| Local deploy            | `mise //apps/atta:deploy:aws` (loads `apps/atta/.env.deploy`) |

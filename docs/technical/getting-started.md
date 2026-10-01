@@ -56,9 +56,9 @@ in a Canopy-root `.env`.
 
 | File                           | Use for                                                                        |
 | ------------------------------ | ------------------------------------------------------------------------------ |
-| `apps/atta/.env`               | Daily local stack (`mise //apps/atta:dev`), Pulumi, ad-hoc e2e                 |
+| `apps/atta/.env`               | Daily local stack (`mise //apps/atta:dev`), ad-hoc e2e against that stack      |
 | `apps/atta/.env.test`          | `mise //apps/atta:test:full` only. Copied from `.env.test.example` if missing. |
-| `apps/atta/.env.aws`           | Optional AWS deploy file (no MinIO dummy keys)                                 |
+| `apps/atta/.env.deploy`        | `mise //apps/atta:deploy*` (Pulumi AWS + on-prem fleet operator vars)          |
 | `apps/atta/deploy/onprem/.env` | Per client VM Compose secrets. Not loaded by `ENV_FILE`.                       |
 
 1. Copy `apps/atta/.env.example` → `apps/atta/.env`.
@@ -67,13 +67,15 @@ in a Canopy-root `.env`.
    `atta`.
 3. Provide secrets (`GEMINI_API_KEY`, `INBOX_CREDENTIALS_ENCRYPTION_KEY`,
    `TENANT_SECRETS_ENCRYPTION_KEY`, `DATABASE_URL`, `S3_BUCKET_NAME`).
-4. For AWS/Pulumi deploy: set `ENV`, `AWS_ACCOUNT_ID`,
-   `AWS_REGION=us-east-1`, `ROOT_DOMAIN`, Cloudflare, Neon
-   (`NEON_API_KEY`, `NEON_PROJECT_ID`), and Gemini keys in
-   `apps/atta/.env` (not `.env.test`). Create the Neon project in the
-   Console before the first apply. Do not deploy with the local MinIO
-   dummy `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY`. Use
-   `ENV_FILE=apps/atta/.env.aws` or an AWS profile. See
+4. For AWS/Pulumi or on-prem fleet deploy: copy
+   `apps/atta/.env.deploy.example` → `apps/atta/.env.deploy` and set
+   `ENV`, `AWS_ACCOUNT_ID`, `AWS_REGION=us-east-1`, `ROOT_DOMAIN`,
+   Cloudflare, Neon (`NEON_API_KEY`, `NEON_PROJECT_ID`), Gemini,
+   `SUPPORT_EMAIL`, and (for fleet) `ONPREM_RELEASE` /
+   `ONPREM_SSH_KEY_PATH`. Create the Neon project in the Console before
+   the first apply. Do not put local MinIO dummy
+   `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` in `.env.deploy` — use
+   SSO, `~/.aws/credentials`, or CI OIDC. See
    [AWS deploy](./deployment/aws.md).
 
 Typical local backend values:

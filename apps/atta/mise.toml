@@ -69,14 +69,17 @@ run = "pnpm --filter @atta/e2e test:e2e:ui"
 [tasks.deploy]
 description = "Build + Pulumi AWS and on-prem fleet"
 dir = "{{config_root}}/../.."
+env = { ENV_FILE = "apps/atta/.env.deploy" }
 run = "pnpm run build && turbo run deploy --filter=@atta/infra --filter=@atta/onprem"
 
 [tasks."deploy:aws"]
 description = "Build + Pulumi AWS track"
 dir = "{{config_root}}/../.."
+env = { ENV_FILE = "apps/atta/.env.deploy" }
 run = "pnpm run build && turbo run deploy --filter=@atta/infra"
 
 [tasks."deploy:onprem"]
 description = "Pulumi on-prem fleet"
 dir = "{{config_root}}/../.."
+env = { ENV_FILE = "apps/atta/.env.deploy" }
 run = "turbo run deploy --filter=@atta/onprem"

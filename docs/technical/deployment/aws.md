@@ -48,11 +48,12 @@ EventBridge Scheduler's minimum rate is one minute, so AWS relay ticks at
 | Sustainability         | Graviton Lambdas, serverless data plane                                                                                                                                                                                                 |
 
 Account-level GuardDuty and CloudTrail stay outside this stack. Enable them on
-the AWS account.
+the AWS account. For multi-account OUs and product×env accounts under a
+management root, see [Organizations landing zone](./organizations.md).
 
 ## Domains
 
-Set these in `apps/atta/.env`. Cloudflare must already host `ROOT_DOMAIN`.
+Set these in `apps/atta/.env.deploy`. Cloudflare must already host `ROOT_DOMAIN`.
 
 | Variable               | Example         | DNS record                                                                                          |
 | ---------------------- | --------------- | --------------------------------------------------------------------------------------------------- |
@@ -78,10 +79,11 @@ Generated once and stored in Pulumi state + Parameter Store:
 - Messaging attestation secret
 
 Pass `GEMINI_API_KEY` (required), `SUPPORT_EMAIL` (required for non-local
-runtimes), and optional OAuth client IDs/secrets through `apps/atta/.env`
-at deploy time. Gemini/OAuth go into the SecureString parameter.
-`SUPPORT_EMAIL` (and optional `TERMS_URL` / `PRIVACY_URL` /
-`LICENSE_LABEL`) are written to SSM and Lambda env for about / health.
+runtimes), and optional OAuth client IDs/secrets through
+`apps/atta/.env.deploy` at deploy time. Gemini/OAuth go into the
+SecureString parameter. `SUPPORT_EMAIL` (and optional `TERMS_URL` /
+`PRIVACY_URL` / `LICENSE_LABEL`) are written to SSM and Lambda env for
+about / health.
 
 ## Neon
 
@@ -101,7 +103,7 @@ Use one project per `ENV`. Recommended settings:
 - Non-prod: 6-hour restore window, suspend after 5 minutes, autoscaling
   0.25–2 CU
 
-Set `NEON_API_KEY` and `NEON_PROJECT_ID` in `apps/atta/.env`. Pulumi
+Set `NEON_API_KEY` and `NEON_PROJECT_ID` in `apps/atta/.env.deploy`. Pulumi
 looks up that project and copies the default-branch **pooled** URL into
 `database_url` and the **direct** URL into `database_direct_url`. If the
 lookup fails, the apply fails.
@@ -125,19 +127,14 @@ Use **`mise //apps/atta:deploy:aws`**. `mise //apps/atta:deploy` runs AWS
 
 1. Install the Pulumi CLI (`mise install` includes it) and log in
    (`pulumi login`).
-2. Copy `apps/atta/.env.example` → `apps/atta/.env` and fill AWS,
-   Cloudflare, Neon (`NEON_API_KEY`, `NEON_PROJECT_ID`), and Gemini
-   values. Create the Neon project first (see [Neon](#neon)). Do **not**
-   deploy with the local MinIO dummy keys
-   (`AWS_ACCESS_KEY_ID=atta`). Pulumi and the AWS SDK read those
-   names. Use an IAM role/profile, or a dedicated file:
-
-   ```bash
-   ENV_FILE=apps/atta/.env.aws mise //apps/atta:deploy:aws
-   ```
-
-   Omit `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` in that file so the
-   SDK uses the shared credentials file or SSO.
+2. Copy `apps/atta/.env.deploy.example` → `apps/atta/.env.deploy` and
+   fill AWS, Cloudflare, Neon (`NEON_API_KEY`, `NEON_PROJECT_ID`),
+   Gemini, and `SUPPORT_EMAIL`. Create the Neon project first (see
+   [Neon](#neon)). Do **not** put local MinIO dummy keys
+   (`AWS_ACCESS_KEY_ID=atta`) in `.env.deploy`. Omit
+   `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` so the SDK uses SSO or
+   `~/.aws/credentials`. `mise //apps/atta:deploy:aws` loads
+   `apps/atta/.env.deploy` by default.
 
 3. Select the stack named after `ENV` (`pulumi stack select --create`
    on `mise //apps/atta:deploy:aws` creates it if missing):

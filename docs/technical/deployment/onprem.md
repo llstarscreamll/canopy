@@ -47,7 +47,7 @@ Copy `apps/atta/deploy/onprem/hosts.example.json` to `apps/atta/deploy/onprem/ho
 An empty or missing inventory makes `mise //apps/atta:deploy:onprem` skip
 (exit 0) so AWS-only applies still work.
 
-## Operator environment (`apps/atta/.env`)
+## Operator environment (`apps/atta/.env.deploy`)
 
 | Variable              | Required when inventory is non-empty | Purpose                                                       |
 | --------------------- | ------------------------------------ | ------------------------------------------------------------- |
@@ -74,7 +74,7 @@ export ONPREM_SSH_KEY_PATH="$HOME/.ssh/atta-onprem"
 mise //apps/atta:deploy:onprem
 ```
 
-Or set those in `apps/atta/.env` and run `mise //apps/atta:deploy` to ship
+Or set those in `apps/atta/.env.deploy` and run `mise //apps/atta:deploy` to ship
 AWS and the fleet together.
 
 First Pulumi stack: created automatically as `fleet` in project

@@ -21,7 +21,7 @@ Build the PWA before composing Caddy. The Caddy image copies
 
 ```bash
 cp hosts.example.json hosts.json
-# ONPREM_RELEASE + ONPREM_SSH_KEY_PATH in apps/atta/.env
+# ONPREM_RELEASE + ONPREM_SSH_KEY_PATH in apps/atta/.env.deploy
 mise //apps/atta:deploy:onprem
 ```
 

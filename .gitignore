@@ -15,6 +15,9 @@ apps/atta/pwa/dist/
 apps/atta/pwa/coverage/
 apps/atta/pwa/node_modules/
 apps/atta/deploy/aws/node_modules/
+infra/landing-zone/node_modules/
+infra/landing-zone/dist/
+infra/landing-zone/dist-test/
 apps/atta/deploy/onprem/hosts.json
 .cache
 
@@ -23,6 +26,7 @@ apps/atta/deploy/onprem/hosts.json
 .env.*
 !.env.example
 !.env.test.example
+!.env.deploy.example
 secrets.json
 secrets.*.json
 .mise.local.toml

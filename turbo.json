@@ -1,7 +1,7 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "envMode": "loose",
-  "globalDependencies": ["apps/*/.env", "apps/*/.env.test"],
+  "globalDependencies": ["apps/*/.env", "apps/*/.env.test", "apps/*/.env.deploy"],
   "tasks": {
     "dev": {
       "cache": false,

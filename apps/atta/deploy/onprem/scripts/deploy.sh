@@ -4,7 +4,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/../../../../.." && pwd)"
 cd "$ROOT/apps/atta/deploy/onprem"
 
-env_file="${ENV_FILE:-apps/atta/.env}"
+env_file="${ENV_FILE:-apps/atta/.env.deploy}"
 if [[ "$env_file" != /* ]]; then
   env_file="$ROOT/$env_file"
 fi
