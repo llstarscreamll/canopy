@@ -33,7 +33,7 @@ export function wireSecurityBaseline(args: SecurityBaselineArgs): {
     assumeRoles: [
       {
         roleArn: pulumi.interpolate`arn:aws:iam::${args.logArchiveAccountId}:role/OrganizationAccountAccessRole`,
-        sessionName: 'landing-zone-log-archive',
+        sessionName: 'aws-org-log-archive',
       },
     ],
   });
@@ -44,7 +44,7 @@ export function wireSecurityBaseline(args: SecurityBaselineArgs): {
     assumeRoles: [
       {
         roleArn: pulumi.interpolate`arn:aws:iam::${args.securityToolingAccountId}:role/OrganizationAccountAccessRole`,
-        sessionName: 'landing-zone-security-tooling',
+        sessionName: 'aws-org-security-tooling',
       },
     ],
   });
@@ -56,7 +56,7 @@ export function wireSecurityBaseline(args: SecurityBaselineArgs): {
       bucket: pulumi.interpolate`${cfg.organizationName}-org-cloudtrail-${args.logArchiveAccountId}`,
       forceDestroy: false,
       tags: {
-        ManagedBy: 'landing-zone',
+        ManagedBy: 'aws-org',
         Organization: cfg.organizationName,
         Purpose: 'org-cloudtrail',
       },
@@ -204,7 +204,7 @@ export function wireSecurityBaseline(args: SecurityBaselineArgs): {
       enableLogFileValidation: true,
       enableLogging: true,
       tags: {
-        ManagedBy: 'landing-zone',
+        ManagedBy: 'aws-org',
         Organization: cfg.organizationName,
       },
     },
@@ -218,7 +218,7 @@ export function wireSecurityBaseline(args: SecurityBaselineArgs): {
       enable: true,
       findingPublishingFrequency: 'FIFTEEN_MINUTES',
       tags: {
-        ManagedBy: 'landing-zone',
+        ManagedBy: 'aws-org',
         Organization: cfg.organizationName,
       },
     },

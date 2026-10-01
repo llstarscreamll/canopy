@@ -4,7 +4,7 @@ packages:
   - apps/*/deploy/*
   - apps/*/deploy/aws/sdks/neon
   - packages/typescript/*
-  - infra/*
+  - ops/*
 allowBuilds:
   '@parcel/watcher': true
   '@pulumi/command': true

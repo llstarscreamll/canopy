@@ -9,7 +9,7 @@ This is an **occasional operator command**, not a CI/CD pipeline. Product
 workloads (for example Atta Pulumi) stay in `apps/<product>/deploy/aws` and are
 unchanged by this program.
 
-Package: `infra/landing-zone` (`@canopy/landing-zone`).
+Package: `ops/aws-org` (`@canopy/aws-org`).
 
 ## What it creates
 
@@ -83,7 +83,7 @@ Control Tower is optional. This program uses Organizations APIs directly.
 ### Pre-flight checklist (AWS Console)
 
 Complete these steps in the **management** account before the first
-`mise //infra/landing-zone:up`.
+`mise //ops/aws-org:up`.
 
 #### 1. Secure the root user
 
@@ -99,7 +99,7 @@ Complete these steps in the **management** account before the first
    consolidated-billing-only, enable all features (irreversible) and finalize.
 3. Under **Policies**, enable **Service control policies (SCPs)**.
 4. Ignore optional banners about **Resource control policies (RCPs)** for the
-   first landing-zone apply unless you plan to use RCPs immediately.
+   first aws-org apply unless you plan to use RCPs immediately.
 
 #### 3. IAM Identity Center
 
@@ -161,9 +161,9 @@ Member accounts use plus-addressing:
 
 ```bash
 export AWS_PROFILE=<mgmt-profile>
-export ENV_FILE=infra/landing-zone/.env   # path for this company
+export ENV_FILE=ops/aws-org/.env   # path for this company
 
-mise //infra/landing-zone:preview
+mise //ops/aws-org:preview
 ```
 
 Confirm the plan creates the expected OUs, member accounts, SCPs, permission
@@ -205,7 +205,7 @@ Before `up`, you must have:
 ## Configure
 
 ```bash
-cp infra/landing-zone/.env.example infra/landing-zone/.env
+cp ops/aws-org/.env.example ops/aws-org/.env
 ```
 
 | Variable                                       | Purpose                                                |
@@ -251,10 +251,10 @@ BUDGET_ALERT_EMAIL=admin@alarcomputing.com
 ```bash
 aws sso login --profile alar-mgmt
 export AWS_PROFILE=alar-mgmt
-export ENV_FILE=infra/landing-zone/.env
+export ENV_FILE=ops/aws-org/.env
 
-mise //infra/landing-zone:preview
-mise //infra/landing-zone:up
+mise //ops/aws-org:preview
+mise //ops/aws-org:up
 ```
 
 `up` selects/creates a Pulumi stack named `$ORGANIZATION_NAME`.
@@ -265,7 +265,7 @@ Outputs include `accountIds`, `transitionOuId`, and (when baseline is on)
 ## Tests
 
 ```bash
-mise //infra/landing-zone:test
+mise //ops/aws-org:test
 ```
 
 Unit tests cover SCP documents and a mocked Pulumi graph (including Transition

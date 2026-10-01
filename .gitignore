@@ -15,9 +15,9 @@ apps/atta/pwa/dist/
 apps/atta/pwa/coverage/
 apps/atta/pwa/node_modules/
 apps/atta/deploy/aws/node_modules/
-infra/landing-zone/node_modules/
-infra/landing-zone/dist/
-infra/landing-zone/dist-test/
+ops/aws-org/node_modules/
+ops/aws-org/dist/
+ops/aws-org/dist-test/
 apps/atta/deploy/onprem/hosts.json
 .cache
 

@@ -13,8 +13,8 @@
 
 - Run `mise install` first. Versions are pinned: Node `24`, Go `1.25`, pnpm `11.5` (`.mise.toml`, `.nvmrc`, root `package.json`, `apps/atta/backend/go.mod`).
 - This repo is **Canopy** (habitat). Products live under `apps/<product>/`. The current product is **Atta** (`apps/atta`). Shared TypeScript is `@canopy/*` in `packages/typescript/`. See [Naming](docs/product/naming.md).
-- Use `pnpm` only. Workspace roots are `apps/*/*`, `apps/*/deploy/*`, `apps/*/deploy/aws/sdks/neon`, `packages/typescript/*`, and `infra/*` (`pnpm-workspace.yaml`), orchestrated by Turbo (`turbo.json`).
-- Env files live per product under `apps/<product>/`. `ENV_FILE` is relative to the repo root. Defaults: app runtime `apps/atta/.env`; `mise //apps/atta:test:full` uses `apps/atta/.env.test`; `mise //apps/atta:deploy*` uses `apps/atta/.env.deploy`. Landing zone uses `infra/landing-zone/.env` (see [Organizations landing zone](docs/technical/deployment/organizations.md)). Loaders (`scripts/with-env.sh`, Playwright, Pulumi) honor `ENV_FILE` and override existing keys. Templates: `.env.example`, `.env.test.example`, `.env.deploy.example`. Turbo uses `envMode: loose` + `globalDependencies: ["apps/*/.env", "apps/*/.env.test", "apps/*/.env.deploy"]`. Keep `apps/atta/deploy/onprem/.env` on each client VM (Compose secrets). Do not commit `apps/atta/deploy/onprem/hosts.json`.
+- Use `pnpm` only. Workspace roots are `apps/*/*`, `apps/*/deploy/*`, `apps/*/deploy/aws/sdks/neon`, `packages/typescript/*`, and `ops/*` (`pnpm-workspace.yaml`), orchestrated by Turbo (`turbo.json`).
+- Env files live per product under `apps/<product>/`. `ENV_FILE` is relative to the repo root. Defaults: app runtime `apps/atta/.env`; `mise //apps/atta:test:full` uses `apps/atta/.env.test`; `mise //apps/atta:deploy*` uses `apps/atta/.env.deploy`. AWS org bootstrap uses `ops/aws-org/.env` (see [Organizations landing zone](docs/technical/deployment/organizations.md)). Loaders (`scripts/with-env.sh`, Playwright, Pulumi) honor `ENV_FILE` and override existing keys. Templates: `.env.example`, `.env.test.example`, `.env.deploy.example`. Turbo uses `envMode: loose` + `globalDependencies: ["apps/*/.env", "apps/*/.env.test", "apps/*/.env.deploy"]`. Keep `apps/atta/deploy/onprem/.env` on each client VM (Compose secrets). Do not commit `apps/atta/deploy/onprem/hosts.json`.
 
 ## Commands that matter
 
@@ -32,7 +32,7 @@ Product daily tasks live in `apps/<product>/mise.toml`. From anywhere:
 - E2E targeted: `pnpm --filter @atta/e2e lint|test:e2e|test:e2e:local|test:e2e:browser|test:e2e:http|test:e2e:ui`.
 - AWS deploy (`apps/atta/deploy/aws`, `@atta/infra`): `pnpm --filter @atta/infra lint|test|build|synth|deploy|migrate`. `deploy` invokes the migrate Lambda when that package changes, then publishes the other Lambdas and web assets.
 - On-prem fleet (`apps/atta/deploy/onprem`, `@atta/onprem`): `pnpm --filter @atta/onprem lint|test|synth|deploy`. Pulumi SSHs each inventory host and loads Compose images tagged `ONPREM_RELEASE`.
-- AWS Organizations landing zone (`infra/landing-zone`, `@canopy/landing-zone`): occasional manual bootstrap — `mise //infra/landing-zone:preview|up|test`. Not wired to CI. See [Organizations landing zone](docs/technical/deployment/organizations.md).
+- AWS Organizations bootstrap (`ops/aws-org`, `@canopy/aws-org`): occasional manual apply — `mise //ops/aws-org:preview|up|test`. Not wired to CI. See [Organizations landing zone](docs/technical/deployment/organizations.md).
 
 ## Backend (`apps/atta/backend`)
 

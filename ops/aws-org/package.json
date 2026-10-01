@@ -1,5 +1,5 @@
 {
-  "name": "@canopy/landing-zone",
+  "name": "@canopy/aws-org",
   "private": true,
   "version": "0.1.0",
   "scripts": {

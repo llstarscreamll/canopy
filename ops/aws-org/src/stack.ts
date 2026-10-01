@@ -21,7 +21,7 @@ export interface LandingZoneOutputs {
 
 function tags(cfg: LandingZoneConfig, extra?: Record<string, string>) {
   return {
-    ManagedBy: 'landing-zone',
+    ManagedBy: 'aws-org',
     Organization: cfg.organizationName,
     ...extra,
   };

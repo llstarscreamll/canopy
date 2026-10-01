@@ -52,7 +52,7 @@ pulumi.runtime.setMocks(
       return args.inputs;
     },
   },
-  'landing-zone',
+  'aws-org',
   'test',
 );
 

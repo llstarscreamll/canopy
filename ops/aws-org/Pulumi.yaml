@@ -1,0 +1,6 @@
+name: aws-org
+runtime:
+  name: nodejs
+  options:
+    typescript: true
+description: AWS Organizations multi-account bootstrap (one management root per run)

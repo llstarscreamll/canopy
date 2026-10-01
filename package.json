@@ -11,7 +11,7 @@
     "apps/*/deploy/*",
     "apps/*/deploy/aws/sdks/neon",
     "packages/typescript/*",
-    "infra/*"
+    "ops/*"
   ],
   "scripts": {
     "setup:local": "./scripts/setup-local.sh",

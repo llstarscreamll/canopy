@@ -3,7 +3,7 @@ import * as path from 'node:path';
 import dotenv from 'dotenv';
 
 const repoRoot = path.resolve(__dirname, '../../..');
-const defaultEnvFile = 'infra/landing-zone/.env';
+const defaultEnvFile = 'ops/aws-org/.env';
 const envFileRaw = process.env.ENV_FILE?.trim();
 const envPath = envFileRaw ? (path.isAbsolute(envFileRaw) ? envFileRaw : path.resolve(repoRoot, envFileRaw)) : path.join(repoRoot, defaultEnvFile);
 if (fs.existsSync(envPath)) {

@@ -1,0 +1,22 @@
+[env]
+ENV_FILE = "ops/aws-org/.env"
+
+[tasks.preview]
+description = "Pulumi preview (loads ENV_FILE)"
+run = "bash scripts/with-env.sh pnpm --filter @canopy/aws-org run preview"
+dir = "{{config_root}}/../.."
+
+[tasks.up]
+description = "Pulumi up (loads ENV_FILE)"
+run = "bash scripts/with-env.sh pnpm --filter @canopy/aws-org run up"
+dir = "{{config_root}}/../.."
+
+[tasks.test]
+description = "Unit tests"
+run = "pnpm --filter @canopy/aws-org test"
+dir = "{{config_root}}/../.."
+
+[tasks.lint]
+description = "Typecheck"
+run = "pnpm --filter @canopy/aws-org lint"
+dir = "{{config_root}}/../.."

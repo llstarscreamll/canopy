@@ -7,14 +7,14 @@ for why those names exist.
 ```text
 canopy/
 ├── go.work                      # Local Go modules
-├── pnpm-workspace.yaml          # Angular, deploy, TS libs, infra
+├── pnpm-workspace.yaml          # Angular, deploy, TS libs, ops
 ├── pkg/                         # Shared Go (extract here when stable)
 ├── packages/
 │   ├── typescript/              # Shared Angular / TypeScript (`@canopy/*`)
 │   ├── swift/                   # Shared Swift packages (iOS)
 │   └── kotlin/                  # Shared Gradle builds (Android)
-├── infra/
-│   └── landing-zone/            # AWS Organizations multi-account bootstrap
+├── ops/
+│   └── aws-org/                 # AWS Organizations multi-account bootstrap
 └── apps/
     └── atta/                    # Current commercial system
         ├── mise.toml            # Daily tasks (`mise :dev`)
@@ -38,7 +38,7 @@ Future products (`threehopper`, `kinglet`, `bowerbird`, …) follow the
 same `apps/<product>/` shape: backend, pwa, desktop, mobile, deploy,
 plus that product's `docker-compose.yml`, `Caddyfile`, and dotenv
 templates. Canopy does not own a root Compose file. Habitat AWS org
-bootstrap lives under `infra/landing-zone` — see
+bootstrap lives under `ops/aws-org` — see
 [Organizations landing zone](../deployment/organizations.md).
 
 ## Daily commands
